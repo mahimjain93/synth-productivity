@@ -10,6 +10,7 @@ import {
 } from "@/lib/storage";
 import { UrgeOverlay } from "./UrgeOverlay";
 import { ShortcutsHelp } from "./ShortcutsHelp";
+import { WorkCyclePanel } from "./WorkCyclePanel";
 
 const XP_VALUES = [10, 25, 50];
 
