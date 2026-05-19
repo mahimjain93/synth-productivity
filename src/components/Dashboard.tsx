@@ -85,6 +85,42 @@ export function Dashboard() {
     setState((s) => ({ ...s, tasks: s.tasks.filter((t) => t.id !== id) }));
   }, []);
 
+  const logQuickTask = useCallback((title: string, xp: number) => {
+    setState((s) => {
+      const today = todayStr();
+      let streak = s.streak;
+      if (s.lastCompletionDate !== today) {
+        streak = s.lastCompletionDate === yesterdayStr() ? s.streak + 1 : 1;
+      }
+      const newXp = s.xp + xp;
+      let level = s.level;
+      let xpRem = newXp;
+      while (xpRem >= xpForLevel(level)) {
+        xpRem -= xpForLevel(level);
+        level += 1;
+      }
+      const t: Task = {
+        id: crypto.randomUUID(),
+        title,
+        xp,
+        done: true,
+        createdAt: Date.now(),
+        completedAt: Date.now(),
+      };
+      setFloaters((f) => [...f, { id: Date.now() + Math.random(), xp }]);
+      return {
+        ...s,
+        tasks: [t, ...s.tasks],
+        xp: xpRem,
+        level,
+        streak,
+        lastCompletionDate: today,
+        totalCompleted: s.totalCompleted + 1,
+      };
+    });
+  }, []);
+
+
   // keyboard shortcuts
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
