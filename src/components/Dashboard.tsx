@@ -212,8 +212,16 @@ export function Dashboard() {
           <StatCard label="DONE" value={state.totalCompleted.toString()} color="cyan" />
         </div>
 
+        {/* Work Cycle */}
+        <WorkCyclePanel
+          state={state}
+          setState={setState}
+          onFloater={(xp) => setFloaters((f) => [...f, { id: Date.now() + Math.random(), xp }])}
+        />
+
         {/* Quick-Add Rituals */}
         <QuickRituals state={state} onLog={(title, xp) => logQuickTask(title, xp)} />
+
 
 
         {/* XP bar */}
