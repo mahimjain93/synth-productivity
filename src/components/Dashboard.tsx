@@ -157,14 +157,14 @@ export function Dashboard() {
         }}
       />
 
-      <div className="relative z-10 mx-auto max-w-3xl px-4 py-8 md:py-12">
+      <div className="relative z-10 mx-auto max-w-6xl px-6 md:px-10 py-8 md:py-12">
         {/* Header */}
         <header className="mb-8 text-center">
-          <h1 className="font-display text-2xl md:text-4xl neon-text-pink crt-flicker">
-            NEON.GRIND
+          <h1 className="font-display text-lg md:text-2xl lg:text-3xl neon-text-pink crt-flicker leading-tight">
+            Welcome to Mahim Management System (MMS)
           </h1>
           <p className="mt-2 text-lg text-muted-foreground font-mono">
-            // a productivity arcade //
+            // let's move //
           </p>
         </header>
 
@@ -174,6 +174,10 @@ export function Dashboard() {
           <StatCard label="STREAK" value={`${state.streak}d`} color="yellow" />
           <StatCard label="DONE" value={state.totalCompleted.toString()} color="cyan" />
         </div>
+
+        {/* Quick-Add Rituals */}
+        <QuickRituals state={state} onLog={(title, xp) => logQuickTask(title, xp)} />
+
 
         {/* XP bar */}
         <div className="mb-6 bg-card neon-border p-4 relative scanlines">
