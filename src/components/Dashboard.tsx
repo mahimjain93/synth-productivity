@@ -395,3 +395,70 @@ function StatCard({
     </div>
   );
 }
+
+const WORK_CYCLE_TITLE = "Work Cycle (20 min)";
+
+function QuickRituals({
+  state,
+  onLog,
+}: {
+  state: AppState;
+  onLog: (title: string, xp: number) => void;
+}) {
+  const today = todayStr();
+  const cycleCount = state.tasks.filter(
+    (t) =>
+      t.done &&
+      t.title === WORK_CYCLE_TITLE &&
+      t.completedAt &&
+      new Date(t.completedAt).toISOString().slice(0, 10) === today,
+  ).length;
+
+  const rituals: Array<{ title: string; xp: number; sub?: string; accent: "pink" | "cyan" | "yellow" }> = [
+    { title: "Morning Protection", xp: 25, sub: "daily armor up", accent: "cyan" },
+    { title: WORK_CYCLE_TITLE, xp: 50, sub: `cycles today: ${cycleCount}`, accent: "pink" },
+    { title: "Morning Smoking Delayed?", xp: 30, sub: "tap = YES", accent: "yellow" },
+  ];
+
+  return (
+    <div className="mb-6">
+      <h2 className="font-display text-xs neon-text-cyan mb-3">// QUICK RITUALS</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {rituals.map((r) => {
+          const border = r.accent === "cyan" ? "neon-border-cyan" : "neon-border";
+          const text =
+            r.accent === "cyan"
+              ? "neon-text-cyan"
+              : r.accent === "yellow"
+              ? "neon-text-yellow"
+              : "neon-text-pink";
+          return (
+            <button
+              key={r.title}
+              onClick={() => onLog(r.title, r.xp)}
+              className={`group bg-card ${border} scanlines p-4 text-left transition-transform hover:scale-[1.02] active:scale-[0.99]`}
+            >
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <span className={`font-display text-[11px] ${text} leading-snug`}>
+                  {r.title}
+                </span>
+                <span className="font-display text-[10px] neon-text-yellow shrink-0">
+                  +{r.xp}XP
+                </span>
+              </div>
+              {r.title === WORK_CYCLE_TITLE ? (
+                <div className="font-mono">
+                  <div className="text-3xl neon-text-pink leading-none">{cycleCount}</div>
+                  <div className="text-xs text-muted-foreground mt-1">cycles today · tap to +1</div>
+                </div>
+              ) : (
+                <p className="font-mono text-sm text-muted-foreground">{r.sub}</p>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
