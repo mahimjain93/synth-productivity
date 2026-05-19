@@ -1,22 +1,52 @@
-## Changes to `src/components/Dashboard.tsx`
+## Improve Work Cycle Tracking
 
-**1. Header text**
-- `NEON.GRIND` → `Welcome to Mahim Management System (MMS)` (shrink font size so it fits on one line on mobile).
-- `// a productivity arcade //` → `// let's move //`
+Replace the current "Work Cycle (20 min)" quick-ritual card with a richer **Work Cycle** panel. All existing app behavior (XP, streak, missions, urge, shortcuts, header, frame width, other ritual cards) stays unchanged.
 
-**2. Wider frame**
-- Container `max-w-3xl` → `max-w-6xl` and bump horizontal padding (`px-4` → `px-6 md:px-10`) so content uses more of the viewport width.
+### New panel sections
 
-**3. Quick-Add Rituals grid (new section above Missions)**
-A grid of pre-defined task cards the user can tap to log instantly. Each click awards XP via the existing `completeTask` flow (creates a one-off completed task so it counts toward XP/streak/total).
+**1. Timer (Pomodoro-style, timestamp-driven)**
+- 20 min focus → 5 min break → 20 min focus … long break (15 min) every 4th cycle.
+- Controls: `START` / `PAUSE` / `RESET` / `SKIP`.
+- Big `MM:SS` countdown in `font-display`, color shifts: pink (focus) / cyan (break).
+- Phase label + "Cycle 3 of 4 until long break".
+- Uses stored `phaseStartedAt` + `phaseDurationMs` + `pausedRemainingMs` so the countdown is correct even after closing the tab or sleeping the laptop. A 1s `setInterval` recomputes from `Date.now()`.
+- When focus phase hits 0: auto-log a cycle (push completed Task `"Work Cycle (20 min)"` with the optional label appended, award +50 XP, fire confetti-style floater), advance to break automatically. Break end → ready for next focus.
+- Browser notification + soft beep (WebAudio oscillator, no asset) when a phase ends.
 
-Cards:
-- **Morning Protection** — +25 XP, single tap logs it.
-- **Work Cycle — 20 min** — +50 XP per cycle. Card shows a local counter `Cycles today: N` derived from completed tasks titled "Work Cycle (20 min)" filtered to today. Tap = +1 cycle (logs a completed task, increments counter, awards XP).
-- **Morning Smoking Delayed?** — +30 XP, single tap = "Yes".
+**2. Manual controls**
+- `+1` and `−1` buttons next to the cycle count (−1 removes the most recent today's cycle and refunds 50 XP / decrements totalCompleted; clamps at 0).
+- Small text input "what are you working on?" — value is saved on the next logged cycle's title as `"Work Cycle (20 min) — <label>"` and shown in history.
 
-Grid layout: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3`, each card styled with `bg-card neon-border-cyan scanlines p-4`, big tap target, title in `font-display`, XP badge in `neon-text-yellow`, and (for Work Cycle) counter in `font-mono text-3xl neon-text-pink`.
+**3. Daily goal + progress ring**
+- User-editable input "Goal: __ cycles/day" (default 4, persisted).
+- Circular SVG progress ring around today's count (stroke = neon-pink, track = border).
+- When count first reaches goal: big celebration overlay (XP burst floaters + neon flash + "GOAL SMASHED" banner that auto-dismisses in ~2.5s). Triggers once per day (guard with `lastGoalCelebratedDate`).
 
-Implementation detail: add a helper `logQuickTask(title, xp)` that pushes a completed `Task` into state and runs the same XP/level/streak math as `completeTask`. Counter for work cycles = `state.tasks.filter(t => t.done && t.title === "Work Cycle (20 min)" && completedAt today).length`.
+**4. 7-day history**
+- Mini bar chart (CSS divs, no library) of the last 7 days' cycle counts.
+- Bars sized relative to max(goal, max count). Today's bar highlighted. Day labels (M/T/W…) under each bar. Tooltip on hover with exact count.
 
-No changes to storage, keyboard shortcuts, urge overlay, or styling tokens.
+### Data model changes (`src/lib/storage.ts`)
+
+Extend `AppState` with (all optional with sensible defaults via `defaultState`):
+```ts
+workCycle: {
+  goal: number;                 // default 4
+  phase: "idle" | "focus" | "break" | "longBreak";
+  phaseStartedAt: number | null;
+  phaseDurationMs: number;
+  pausedRemainingMs: number | null;  // non-null = paused
+  cyclesSinceLongBreak: number;      // 0..3
+  currentLabel: string;
+  lastGoalCelebratedDate: string | null;
+}
+```
+Cycle history derives from existing `tasks` (filter by title prefix + completedAt date), so no separate history table needed.
+
+### Files touched
+- `src/lib/storage.ts` — add `workCycle` slice + defaults; bump storage key suffix or merge via existing `{ ...defaultState, ...parsed }` (already safe).
+- `src/components/Dashboard.tsx` — remove Work Cycle entry from the `QuickRituals` rituals array; render new `<WorkCyclePanel state={state} setState={setState} onFloater={...} />` above or in place of Quick Rituals. Morning Protection and Smoking Delayed cards remain.
+- `src/components/WorkCyclePanel.tsx` — new component containing timer, manual controls, label input, goal editor, progress ring, history chart, celebration overlay.
+
+### Out of scope (per your reply)
+No additional ritual types, no cycle-level notes/journal beyond the single label, no sound settings UI (beep is on by default, can be muted with a tiny 🔊/🔇 toggle in the panel header).

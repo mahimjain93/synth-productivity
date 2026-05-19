@@ -7,6 +7,20 @@ export interface Task {
   completedAt?: number;
 }
 
+export type WorkPhase = "idle" | "focus" | "break" | "longBreak";
+
+export interface WorkCycleState {
+  goal: number;
+  phase: WorkPhase;
+  phaseStartedAt: number | null;
+  phaseDurationMs: number;
+  pausedRemainingMs: number | null;
+  cyclesSinceLongBreak: number;
+  currentLabel: string;
+  lastGoalCelebratedDate: string | null;
+  muted: boolean;
+}
+
 export interface AppState {
   tasks: Task[];
   xp: number;
@@ -14,9 +28,22 @@ export interface AppState {
   streak: number;
   lastCompletionDate: string | null; // YYYY-MM-DD
   totalCompleted: number;
+  workCycle: WorkCycleState;
 }
 
 const KEY = "synthwave-productivity-v1";
+
+export const defaultWorkCycle: WorkCycleState = {
+  goal: 4,
+  phase: "idle",
+  phaseStartedAt: null,
+  phaseDurationMs: 20 * 60 * 1000,
+  pausedRemainingMs: null,
+  cyclesSinceLongBreak: 0,
+  currentLabel: "",
+  lastGoalCelebratedDate: null,
+  muted: false,
+};
 
 export const defaultState: AppState = {
   tasks: [],
@@ -25,7 +52,14 @@ export const defaultState: AppState = {
   streak: 0,
   lastCompletionDate: null,
   totalCompleted: 0,
+  workCycle: defaultWorkCycle,
 };
+
+export const WORK_CYCLE_TITLE = "Work Cycle (20 min)";
+export const FOCUS_MS = 20 * 60 * 1000;
+export const BREAK_MS = 5 * 60 * 1000;
+export const LONG_BREAK_MS = 15 * 60 * 1000;
+
 
 export function loadState(): AppState {
   if (typeof window === "undefined") return defaultState;
