@@ -85,6 +85,42 @@ export function Dashboard() {
     setState((s) => ({ ...s, tasks: s.tasks.filter((t) => t.id !== id) }));
   }, []);
 
+  const logQuickTask = useCallback((title: string, xp: number) => {
+    setState((s) => {
+      const today = todayStr();
+      let streak = s.streak;
+      if (s.lastCompletionDate !== today) {
+        streak = s.lastCompletionDate === yesterdayStr() ? s.streak + 1 : 1;
+      }
+      const newXp = s.xp + xp;
+      let level = s.level;
+      let xpRem = newXp;
+      while (xpRem >= xpForLevel(level)) {
+        xpRem -= xpForLevel(level);
+        level += 1;
+      }
+      const t: Task = {
+        id: crypto.randomUUID(),
+        title,
+        xp,
+        done: true,
+        createdAt: Date.now(),
+        completedAt: Date.now(),
+      };
+      setFloaters((f) => [...f, { id: Date.now() + Math.random(), xp }]);
+      return {
+        ...s,
+        tasks: [t, ...s.tasks],
+        xp: xpRem,
+        level,
+        streak,
+        lastCompletionDate: today,
+        totalCompleted: s.totalCompleted + 1,
+      };
+    });
+  }, []);
+
+
   // keyboard shortcuts
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -157,14 +193,14 @@ export function Dashboard() {
         }}
       />
 
-      <div className="relative z-10 mx-auto max-w-3xl px-4 py-8 md:py-12">
+      <div className="relative z-10 mx-auto max-w-6xl px-6 md:px-10 py-8 md:py-12">
         {/* Header */}
         <header className="mb-8 text-center">
-          <h1 className="font-display text-2xl md:text-4xl neon-text-pink crt-flicker">
-            NEON.GRIND
+          <h1 className="font-display text-lg md:text-2xl lg:text-3xl neon-text-pink crt-flicker leading-tight">
+            Welcome to Mahim Management System (MMS)
           </h1>
           <p className="mt-2 text-lg text-muted-foreground font-mono">
-            // a productivity arcade //
+            // let's move //
           </p>
         </header>
 
@@ -174,6 +210,10 @@ export function Dashboard() {
           <StatCard label="STREAK" value={`${state.streak}d`} color="yellow" />
           <StatCard label="DONE" value={state.totalCompleted.toString()} color="cyan" />
         </div>
+
+        {/* Quick-Add Rituals */}
+        <QuickRituals state={state} onLog={(title, xp) => logQuickTask(title, xp)} />
+
 
         {/* XP bar */}
         <div className="mb-6 bg-card neon-border p-4 relative scanlines">
@@ -355,3 +395,70 @@ function StatCard({
     </div>
   );
 }
+
+const WORK_CYCLE_TITLE = "Work Cycle (20 min)";
+
+function QuickRituals({
+  state,
+  onLog,
+}: {
+  state: AppState;
+  onLog: (title: string, xp: number) => void;
+}) {
+  const today = todayStr();
+  const cycleCount = state.tasks.filter(
+    (t) =>
+      t.done &&
+      t.title === WORK_CYCLE_TITLE &&
+      t.completedAt &&
+      new Date(t.completedAt).toISOString().slice(0, 10) === today,
+  ).length;
+
+  const rituals: Array<{ title: string; xp: number; sub?: string; accent: "pink" | "cyan" | "yellow" }> = [
+    { title: "Morning Protection", xp: 25, sub: "daily armor up", accent: "cyan" },
+    { title: WORK_CYCLE_TITLE, xp: 50, sub: `cycles today: ${cycleCount}`, accent: "pink" },
+    { title: "Morning Smoking Delayed?", xp: 30, sub: "tap = YES", accent: "yellow" },
+  ];
+
+  return (
+    <div className="mb-6">
+      <h2 className="font-display text-xs neon-text-cyan mb-3">// QUICK RITUALS</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {rituals.map((r) => {
+          const border = r.accent === "cyan" ? "neon-border-cyan" : "neon-border";
+          const text =
+            r.accent === "cyan"
+              ? "neon-text-cyan"
+              : r.accent === "yellow"
+              ? "neon-text-yellow"
+              : "neon-text-pink";
+          return (
+            <button
+              key={r.title}
+              onClick={() => onLog(r.title, r.xp)}
+              className={`group bg-card ${border} scanlines p-4 text-left transition-transform hover:scale-[1.02] active:scale-[0.99]`}
+            >
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <span className={`font-display text-[11px] ${text} leading-snug`}>
+                  {r.title}
+                </span>
+                <span className="font-display text-[10px] neon-text-yellow shrink-0">
+                  +{r.xp}XP
+                </span>
+              </div>
+              {r.title === WORK_CYCLE_TITLE ? (
+                <div className="font-mono">
+                  <div className="text-3xl neon-text-pink leading-none">{cycleCount}</div>
+                  <div className="text-xs text-muted-foreground mt-1">cycles today · tap to +1</div>
+                </div>
+              ) : (
+                <p className="font-mono text-sm text-muted-foreground">{r.sub}</p>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
