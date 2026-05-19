@@ -66,7 +66,12 @@ export function loadState(): AppState {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return defaultState;
-    return { ...defaultState, ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    return {
+      ...defaultState,
+      ...parsed,
+      workCycle: { ...defaultWorkCycle, ...(parsed.workCycle ?? {}) },
+    };
   } catch {
     return defaultState;
   }
