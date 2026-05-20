@@ -11,6 +11,13 @@ import {
   type Task,
   type WorkPhase,
 } from "@/lib/storage";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const CYCLE_XP = 50;
 
@@ -310,7 +317,7 @@ export function WorkCyclePanel({
   const cyclesToLong = 4 - wc.cyclesSinceLongBreak;
 
   return (
-    <div className={`mb-6 bg-card ${accentBorder} p-4 relative scanlines`}>
+    <div className={`bg-card ${accentBorder} p-4 relative scanlines h-full`}>
       <div className="flex items-center justify-between mb-4">
         <h2 className={`font-display text-xs ${accentText}`}>// WORK CYCLE</h2>
         <button
@@ -323,10 +330,10 @@ export function WorkCyclePanel({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-start">
-        {/* Left: timer + controls + label */}
+      <div className="flex flex-col gap-5">
+        {/* Timer + controls + label */}
         <div>
-          <div className="flex items-baseline gap-3 mb-1">
+          <div className="flex items-baseline gap-3 mb-1 flex-wrap">
             <span className={`font-display text-[10px] ${accentText}`}>
               {phaseLabel[wc.phase]}
             </span>
@@ -340,7 +347,7 @@ export function WorkCyclePanel({
             )}
           </div>
 
-          <div className={`font-display text-5xl md:text-6xl ${accentText} crt-flicker leading-none mb-3`}>
+          <div className={`font-display text-4xl md:text-5xl ${accentText} crt-flicker leading-none mb-3`}>
             {fmt(remaining)}
           </div>
 
@@ -386,11 +393,11 @@ export function WorkCyclePanel({
             value={wc.currentLabel}
             onChange={(e) => setWC({ currentLabel: e.target.value })}
             placeholder="what are you working on?"
-            className="w-full bg-input border border-border px-3 py-2 font-mono text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:neon-border-cyan"
+            className="w-full bg-input border border-border px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:neon-border-cyan"
           />
         </div>
 
-        {/* Right: progress ring + manual ± */}
+        {/* Progress ring + manual ± + goal */}
         <div className="flex flex-col items-center gap-3">
           <div className="relative" style={{ width: ringSize, height: ringSize }}>
             <svg width={ringSize} height={ringSize} className="-rotate-90">
@@ -458,53 +465,68 @@ export function WorkCyclePanel({
               }
               className="w-14 bg-input border border-border px-2 py-1 font-mono text-sm text-foreground focus:outline-none focus:neon-border-cyan"
             />
-            /day
+            today
           </label>
         </div>
+
+        {/* History trigger */}
+        <Dialog>
+          <DialogTrigger asChild>
+            <button className="w-full font-display text-[10px] px-3 py-2 neon-border-cyan bg-transparent neon-text-cyan hover:bg-secondary/10">
+              // LAST 7 DAYS
+            </button>
+          </DialogTrigger>
+          <DialogContent className="bg-card neon-border-cyan scanlines max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-display text-sm neon-text-cyan">
+                // LAST 7 DAYS
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-mono text-xs text-muted-foreground">
+                total {history.reduce((a, b) => a + b.count, 0)} cycles
+              </span>
+              <span className="font-mono text-xs text-muted-foreground">
+                goal {wc.goal}/day
+              </span>
+            </div>
+            <div className="flex items-end gap-2 h-40">
+              {history.map((d) => {
+                const h = (d.count / maxBar) * 100;
+                const reachedGoal = d.count >= wc.goal;
+                return (
+                  <div key={d.key} className="flex-1 flex flex-col items-center gap-1" title={`${d.key}: ${d.count} cycles`}>
+                    <div className="w-full flex-1 flex items-end">
+                      <div
+                        className={`w-full transition-all ${
+                          d.isToday
+                            ? "bg-primary"
+                            : reachedGoal
+                            ? "bg-secondary"
+                            : "bg-muted-foreground/40"
+                        }`}
+                        style={{
+                          height: `${Math.max(d.count > 0 ? 6 : 2, h)}%`,
+                          boxShadow: d.isToday ? "0 0 8px hsl(var(--primary))" : undefined,
+                        }}
+                      />
+                    </div>
+                    <span
+                      className={`font-mono text-[10px] ${
+                        d.isToday ? "neon-text-pink" : "text-muted-foreground"
+                      }`}
+                    >
+                      {d.label}
+                    </span>
+                    <span className="font-mono text-[10px] text-muted-foreground">{d.count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {/* 7-day history */}
-      <div className="mt-5 pt-4 border-t border-border">
-        <div className="flex items-center justify-between mb-2">
-          <span className="font-display text-[10px] neon-text-cyan">// LAST 7 DAYS</span>
-          <span className="font-mono text-xs text-muted-foreground">
-            total {history.reduce((a, b) => a + b.count, 0)}
-          </span>
-        </div>
-        <div className="flex items-end gap-2 h-20">
-          {history.map((d) => {
-            const h = (d.count / maxBar) * 100;
-            const reachedGoal = d.count >= wc.goal;
-            return (
-              <div key={d.key} className="flex-1 flex flex-col items-center gap-1" title={`${d.key}: ${d.count} cycles`}>
-                <div className="w-full flex-1 flex items-end">
-                  <div
-                    className={`w-full transition-all ${
-                      d.isToday
-                        ? "bg-primary"
-                        : reachedGoal
-                        ? "bg-secondary"
-                        : "bg-muted-foreground/40"
-                    }`}
-                    style={{
-                      height: `${Math.max(d.count > 0 ? 6 : 2, h)}%`,
-                      boxShadow: d.isToday ? "0 0 8px hsl(var(--primary))" : undefined,
-                    }}
-                  />
-                </div>
-                <span
-                  className={`font-mono text-[10px] ${
-                    d.isToday ? "neon-text-pink" : "text-muted-foreground"
-                  }`}
-                >
-                  {d.label}
-                </span>
-                <span className="font-mono text-[10px] text-muted-foreground">{d.count}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
       {celebrate && (
         <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
