@@ -317,7 +317,7 @@ export function WorkCyclePanel({
   const cyclesToLong = 4 - wc.cyclesSinceLongBreak;
 
   return (
-    <div className={`mb-6 bg-card ${accentBorder} p-4 relative scanlines`}>
+    <div className={`bg-card ${accentBorder} p-4 relative scanlines h-full`}>
       <div className="flex items-center justify-between mb-4">
         <h2 className={`font-display text-xs ${accentText}`}>// WORK CYCLE</h2>
         <button
