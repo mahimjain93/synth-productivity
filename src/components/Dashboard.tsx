@@ -194,7 +194,7 @@ export function Dashboard() {
         }}
       />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6 md:px-10 py-8 md:py-12">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-10 py-8 md:py-12">
         {/* Header */}
         <header className="mb-8 text-center">
           <h1 className="font-display text-lg md:text-2xl lg:text-3xl neon-text-pink crt-flicker leading-tight">
@@ -212,15 +212,29 @@ export function Dashboard() {
           <StatCard label="DONE" value={state.totalCompleted.toString()} color="cyan" />
         </div>
 
-        {/* Work Cycle */}
-        <WorkCyclePanel
-          state={state}
-          setState={setState}
-          onFloater={(xp) => setFloaters((f) => [...f, { id: Date.now() + Math.random(), xp }])}
-        />
+        {/* Rituals — all equal */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 items-stretch">
+          <WorkCyclePanel
+            state={state}
+            setState={setState}
+            onFloater={(xp) => setFloaters((f) => [...f, { id: Date.now() + Math.random(), xp }])}
+          />
+          <RitualCard
+            title="Morning Protection"
+            xp={25}
+            sub="daily armor up"
+            accent="cyan"
+            onLog={logQuickTask}
+          />
+          <RitualCard
+            title="Morning Smoking Delayed?"
+            xp={30}
+            sub="tap = YES"
+            accent="yellow"
+            onLog={logQuickTask}
+          />
+        </div>
 
-        {/* Quick-Add Rituals */}
-        <QuickRituals state={state} onLog={(title, xp) => logQuickTask(title, xp)} />
 
 
 
