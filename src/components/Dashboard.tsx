@@ -419,50 +419,43 @@ function StatCard({
   );
 }
 
-function QuickRituals({
+function RitualCard({
+  title,
+  xp,
+  sub,
+  accent,
   onLog,
 }: {
-  state: AppState;
+  title: string;
+  xp: number;
+  sub: string;
+  accent: "pink" | "cyan" | "yellow";
   onLog: (title: string, xp: number) => void;
 }) {
-  const rituals: Array<{ title: string; xp: number; sub: string; accent: "pink" | "cyan" | "yellow" }> = [
-    { title: "Morning Protection", xp: 25, sub: "daily armor up", accent: "cyan" },
-    { title: "Morning Smoking Delayed?", xp: 30, sub: "tap = YES", accent: "yellow" },
-  ];
-
+  const border = accent === "cyan" ? "neon-border-cyan" : "neon-border";
+  const text =
+    accent === "cyan"
+      ? "neon-text-cyan"
+      : accent === "yellow"
+      ? "neon-text-yellow"
+      : "neon-text-pink";
   return (
-    <div className="mb-6">
-      <h2 className="font-display text-xs neon-text-cyan mb-3">// QUICK RITUALS</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {rituals.map((r) => {
-          const border = r.accent === "cyan" ? "neon-border-cyan" : "neon-border";
-          const text =
-            r.accent === "cyan"
-              ? "neon-text-cyan"
-              : r.accent === "yellow"
-              ? "neon-text-yellow"
-              : "neon-text-pink";
-          return (
-            <button
-              key={r.title}
-              onClick={() => onLog(r.title, r.xp)}
-              className={`group bg-card ${border} scanlines p-4 text-left transition-transform hover:scale-[1.02] active:scale-[0.99]`}
-            >
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <span className={`font-display text-[11px] ${text} leading-snug`}>
-                  {r.title}
-                </span>
-                <span className="font-display text-[10px] neon-text-yellow shrink-0">
-                  +{r.xp}XP
-                </span>
-              </div>
-              <p className="font-mono text-sm text-muted-foreground">{r.sub}</p>
-            </button>
-          );
-        })}
+    <button
+      onClick={() => onLog(title, xp)}
+      className={`group bg-card ${border} scanlines p-4 text-left transition-transform hover:scale-[1.02] active:scale-[0.99] h-full flex flex-col`}
+    >
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <span className={`font-display text-[11px] ${text} leading-snug`}>
+          {title}
+        </span>
+        <span className="font-display text-[10px] neon-text-yellow shrink-0">
+          +{xp}XP
+        </span>
       </div>
-    </div>
+      <p className="font-mono text-sm text-muted-foreground">{sub}</p>
+    </button>
   );
 }
+
 
 
