@@ -11,6 +11,13 @@ import {
   type Task,
   type WorkPhase,
 } from "@/lib/storage";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const CYCLE_XP = 50;
 
