@@ -23,6 +23,7 @@ export function Dashboard() {
   const [xpValue, setXpValue] = useState(25);
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [urgeOpen, setUrgeOpen] = useState(false);
+  const [urgeLogOpen, setUrgeLogOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [floaters, setFloaters] = useState<Array<{ id: number; xp: number }>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
