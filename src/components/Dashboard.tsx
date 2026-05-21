@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   loadState,
   saveState,
+  saveUrgeEntry,
   xpForLevel,
   todayStr,
   yesterdayStr,
@@ -9,8 +10,10 @@ import {
   type Task,
 } from "@/lib/storage";
 import { UrgeOverlay } from "./UrgeOverlay";
+import { UrgeLog } from "./UrgeLog";
 import { ShortcutsHelp } from "./ShortcutsHelp";
 import { WorkCyclePanel } from "./WorkCyclePanel";
+
 
 const XP_VALUES = [10, 25, 50];
 
@@ -20,6 +23,7 @@ export function Dashboard() {
   const [xpValue, setXpValue] = useState(25);
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [urgeOpen, setUrgeOpen] = useState(false);
+  const [urgeLogOpen, setUrgeLogOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [floaters, setFloaters] = useState<Array<{ id: number; xp: number }>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -369,6 +373,12 @@ export function Dashboard() {
             [?]
           </button>
           <button
+            onClick={() => setUrgeLogOpen(true)}
+            className="font-display text-[9px] px-3 py-2 bg-card neon-border-cyan hover:bg-secondary/10"
+          >
+            [ LOG ]
+          </button>
+          <button
             onClick={() => setUrgeOpen(true)}
             className="font-display text-[10px] px-4 py-3 bg-card neon-border animate-pulse-glow hover:scale-105 transition-transform"
           >
@@ -390,7 +400,15 @@ export function Dashboard() {
         </div>
       </div>
 
-      {urgeOpen && <UrgeOverlay onClose={() => setUrgeOpen(false)} />}
+      {urgeOpen && (
+        <UrgeOverlay
+          onClose={(entry) => {
+            saveUrgeEntry(entry);
+            setUrgeOpen(false);
+          }}
+        />
+      )}
+      <UrgeLog open={urgeLogOpen} onOpenChange={setUrgeLogOpen} />
       {helpOpen && <ShortcutsHelp onClose={() => setHelpOpen(false)} />}
     </div>
   );

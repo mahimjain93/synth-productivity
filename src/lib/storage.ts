@@ -95,3 +95,40 @@ export function yesterdayStr() {
   d.setDate(d.getDate() - 1);
   return d.toISOString().slice(0, 10);
 }
+
+// ===== Urge log =====
+export type UrgeAction = "breathing" | "walk" | "water" | "stretch" | "cold-water";
+
+export interface UrgeEntry {
+  id: string;
+  startedAt: number;
+  endedAt: number;
+  reason?: string;
+  defeated: boolean;
+  actionsUsed: UrgeAction[];
+}
+
+const URGE_KEY = "synthwave-urge-log-v1";
+
+export function loadUrgeLog(): UrgeEntry[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(URGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveUrgeEntry(entry: UrgeEntry) {
+  if (typeof window === "undefined") return;
+  const all = loadUrgeLog();
+  all.push(entry);
+  localStorage.setItem(URGE_KEY, JSON.stringify(all));
+}
+
+export function loadUrgeLogSorted(): UrgeEntry[] {
+  return loadUrgeLog().sort((a, b) => b.startedAt - a.startedAt);
+}
