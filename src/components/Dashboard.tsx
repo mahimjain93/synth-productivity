@@ -373,6 +373,12 @@ export function Dashboard() {
             [?]
           </button>
           <button
+            onClick={() => setUrgeLogOpen(true)}
+            className="font-display text-[9px] px-3 py-2 bg-card neon-border-cyan hover:bg-secondary/10"
+          >
+            [ LOG ]
+          </button>
+          <button
             onClick={() => setUrgeOpen(true)}
             className="font-display text-[10px] px-4 py-3 bg-card neon-border animate-pulse-glow hover:scale-105 transition-transform"
           >
