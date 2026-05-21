@@ -5,7 +5,7 @@ export const Route = createFileRoute("/")({
   component: Dashboard,
   head: () => ({
     meta: [
-      { title: "NEON.GRIND — Synthwave Productivity Arcade" },
+      { title: "YouMS — Synthwave Movement Arcade" },
       {
         name: "description",
         content:
