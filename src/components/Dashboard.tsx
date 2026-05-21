@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   loadState,
   saveState,
+  saveUrgeEntry,
   xpForLevel,
   todayStr,
   yesterdayStr,
@@ -9,8 +10,10 @@ import {
   type Task,
 } from "@/lib/storage";
 import { UrgeOverlay } from "./UrgeOverlay";
+import { UrgeLog } from "./UrgeLog";
 import { ShortcutsHelp } from "./ShortcutsHelp";
 import { WorkCyclePanel } from "./WorkCyclePanel";
+
 
 const XP_VALUES = [10, 25, 50];
 
