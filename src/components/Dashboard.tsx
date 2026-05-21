@@ -400,7 +400,15 @@ export function Dashboard() {
         </div>
       </div>
 
-      {urgeOpen && <UrgeOverlay onClose={() => setUrgeOpen(false)} />}
+      {urgeOpen && (
+        <UrgeOverlay
+          onClose={(entry) => {
+            saveUrgeEntry(entry);
+            setUrgeOpen(false);
+          }}
+        />
+      )}
+      <UrgeLog open={urgeLogOpen} onOpenChange={setUrgeLogOpen} />
       {helpOpen && <ShortcutsHelp onClose={() => setHelpOpen(false)} />}
     </div>
   );
