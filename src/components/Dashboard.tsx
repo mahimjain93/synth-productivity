@@ -182,7 +182,7 @@ export function Dashboard() {
   const progress = (state.xp / nextLevelXp) * 100;
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen">
       {/* Background grid floor */}
       <div className="pointer-events-none fixed inset-x-0 bottom-0 h-[55vh] overflow-hidden opacity-50">
         <div
