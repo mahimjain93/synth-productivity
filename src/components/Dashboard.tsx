@@ -4,6 +4,7 @@ import {
   saveState,
   saveUrgeEntry,
   xpForLevel,
+  localDateStr,
   todayStr,
   yesterdayStr,
   type AppState,
@@ -31,10 +32,14 @@ export function Dashboard() {
   useEffect(() => saveState(state), [state]);
 
   const activeTasks = useMemo(() => state.tasks.filter((t) => !t.done), [state.tasks]);
+  const doneTodayTitles = useMemo(
+    () => new Set(state.tasks.filter((t) => t.done && t.completedAt && localDateStr(new Date(t.completedAt)) === todayStr()).map((t) => t.title)),
+    [state.tasks],
+  );
   const completedToday = useMemo(
     () =>
       state.tasks.filter(
-        (t) => t.done && t.completedAt && new Date(t.completedAt).toISOString().slice(0, 10) === todayStr(),
+        (t) => t.done && t.completedAt && localDateStr(new Date(t.completedAt)) === todayStr(),
       ),
     [state.tasks],
   );
@@ -229,6 +234,7 @@ export function Dashboard() {
             sub="daily armor up"
             accent="cyan"
             onLog={logQuickTask}
+            doneToday={doneTodayTitles.has("Morning Protection")}
           />
           <RitualCard
             title="Morning Smoking Delayed?"
@@ -236,6 +242,7 @@ export function Dashboard() {
             sub="tap = YES"
             accent="yellow"
             onLog={logQuickTask}
+            doneToday={doneTodayTitles.has("Morning Smoking Delayed?")}
           />
         </div>
 
@@ -443,12 +450,14 @@ function RitualCard({
   sub,
   accent,
   onLog,
+  doneToday,
 }: {
   title: string;
   xp: number;
   sub: string;
   accent: "pink" | "cyan" | "yellow";
   onLog: (title: string, xp: number) => void;
+  doneToday?: boolean;
 }) {
   const border = accent === "cyan" ? "neon-border-cyan" : "neon-border";
   const text =
@@ -459,18 +468,21 @@ function RitualCard({
       : "neon-text-pink";
   return (
     <button
-      onClick={() => onLog(title, xp)}
-      className={`group bg-card ${border} scanlines p-4 text-left transition-transform hover:scale-[1.02] active:scale-[0.99] h-full flex flex-col`}
+      onClick={() => !doneToday && onLog(title, xp)}
+      disabled={doneToday}
+      className={`group bg-card ${border} scanlines p-4 text-left h-full flex flex-col transition-all ${
+        doneToday ? "opacity-50 cursor-not-allowed" : "hover:scale-[1.02] active:scale-[0.99]"
+      }`}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <span className={`font-display text-[11px] ${text} leading-snug`}>
           {title}
         </span>
         <span className="font-display text-[10px] neon-text-yellow shrink-0">
-          +{xp}XP
+          {doneToday ? "✓ DONE" : `+${xp}XP`}
         </span>
       </div>
-      <p className="font-mono text-sm text-muted-foreground">{sub}</p>
+      <p className="font-mono text-sm text-muted-foreground">{doneToday ? "logged today" : sub}</p>
     </button>
   );
 }
