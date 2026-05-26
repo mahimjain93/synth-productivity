@@ -4,6 +4,7 @@ import {
   FOCUS_MS,
   LONG_BREAK_MS,
   WORK_CYCLE_TITLE,
+  localDateStr,
   todayStr,
   xpForLevel,
   yesterdayStr,
@@ -28,9 +29,7 @@ function fmt(ms: number) {
   return `${m.toString().padStart(2, "0")}:${r.toString().padStart(2, "0")}`;
 }
 
-function dateStr(d: Date) {
-  return d.toISOString().slice(0, 10);
-}
+const dateStr = localDateStr;
 
 function beep(muted: boolean, kind: "focus-end" | "break-end") {
   if (muted) return;
